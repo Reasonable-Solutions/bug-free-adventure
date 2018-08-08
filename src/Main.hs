@@ -22,7 +22,7 @@ data Daycare = Daycare { arsverkPedagogiskLeder :: Double
                        , storeBarn :: Double
                        } deriving (Generic, ToSchema, ToJSON, Show)
 
-data Daycares = DayCares [Daycare] deriving (Generic, ToSchema,ToJSON, Show)
+data Daycares = Daycares [Daycare] deriving (Generic, ToSchema,ToJSON, Show)
 
 type DayCareAPI = "barnehager" :> QueryParam "query" Text :> Get '[JSON] Daycares
 
@@ -31,10 +31,12 @@ type SwaggerAPI = "swagger.json" :> Get '[JSON] Swagger
 type API = DayCareAPI :<|> SwaggerAPI
 
 server :: Server API
-server = let daycares :: Maybe Text -> Handler Daycares
-             daycares query = undefined
+server = let
+           daycares :: Maybe Text -> Handler Daycares
+           daycares query = case query of
+               Nothing -> return $ Daycares [(Daycare 0 0 0 0)]
+               Just _ -> return $ Daycares [ (Daycare 1 2 3 4) ]
          in daycares :<|> return (toSwagger (Proxy :: Proxy DayCareAPI))
-  
 
 main :: IO ()
 main = run 8000 $ simpleCors $ logStdoutDev $ serve (Proxy :: Proxy API) server
