@@ -6,7 +6,8 @@
 module Main where
 
 import Data.Aeson
-import Data.Swagger
+import Data.Char as Char
+import Data.Swagger hiding (fieldLabelModifier)
 import Data.Text
 import GHC.Generics
 import Network.Wai.Handler.Warp (run)
@@ -15,12 +16,24 @@ import Network.Wai.Middleware.RequestLogger (logStdoutDev)
 import Servant
 import Servant.Swagger
 
+capitalized :: String -> String
+capitalized [] = []
+capitalized (head:tail) = Char.toUpper head : tail
 
 data Daycare = Daycare { arsverkPedagogiskLeder :: Double
                        , arsverkGrunnbemanning :: Double
+                       , antallBarnFraOgMed3Ar :: Double
                        , antallBarnUnder3Ar :: Double
-                       , storeBarn :: Double
-                       } deriving (Generic, ToSchema, ToJSON, Show)
+                       , uniqueId :: Text
+                       , kommune :: Text 
+                       , fylke :: Text 
+                       , barnehagenavn :: Text 
+                       } deriving (Generic, ToSchema, Show)
+
+instance ToJSON Daycare where
+  toJSON = genericToJSON defaultOptions {
+             fieldLabelModifier = capitalized }
+
 
 data Daycares = Daycares [Daycare] deriving (Generic, ToSchema,ToJSON, Show)
 
@@ -28,25 +41,28 @@ type DayCareAPI = "barnehager" :> QueryParam "query" Text :> Get '[JSON] Daycare
 
 type SwaggerAPI = "swagger.json" :> Get '[JSON] Swagger
 
-type API = DayCareAPI :<|> SwaggerAPI
+type DayCareIdAPI = "id" :> Get '[JSON] Daycare
+
+type API = DayCareAPI :<|> DayCareIdAPI :<|> SwaggerAPI
+
+fakecare = Daycare 1 1 1 1 "id" "Oslo" "Fylke" "Sokkelbarnehagen"
 
 server :: Server API
 server = let
            daycares :: Maybe Text -> Handler Daycares
            daycares query = case query of
-               Nothing -> return $ Daycares [(Daycare 0 0 0 0)
-                                            , (Daycare 1 2 3 4)
-                                            , (Daycare 1 2 3 4)
-                                            , (Daycare 1 2 3 4)
-                                            , (Daycare 1 2 3 4)
-                                            , (Daycare 1 2 3 4)
-                                            , (Daycare 1 2 3 4)
-                                            , (Daycare 1 2 3 4)
-                                            , (Daycare 1 2 3 4)
+               Nothing -> return $ Daycares [ fakecare
+                                            , fakecare
+                                            , fakecare
+                                            , fakecare
+                                            , fakecare
+                                            , fakecare
+                                            , fakecare
+                                            , fakecare
                                             ]
                             
-               Just _ -> return $ Daycares [ (Daycare 1 2 3 4) ]
-         in daycares :<|> return (toSwagger (Proxy :: Proxy DayCareAPI))
+               Just _ -> return $ Daycares [ fakecare ]
+         in daycares :<|> return fakecare :<|> return (toSwagger (Proxy :: Proxy DayCareAPI))
 
 main :: IO ()
 main = run 8000 $ simpleCors $ logStdoutDev $ serve (Proxy :: Proxy API) server
