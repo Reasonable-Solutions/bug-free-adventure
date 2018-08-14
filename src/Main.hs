@@ -34,7 +34,17 @@ server :: Server API
 server = let
            daycares :: Maybe Text -> Handler Daycares
            daycares query = case query of
-               Nothing -> return $ Daycares [(Daycare 0 0 0 0)]
+               Nothing -> return $ Daycares [(Daycare 0 0 0 0)
+                                            , (Daycare 1 2 3 4)
+                                            , (Daycare 1 2 3 4)
+                                            , (Daycare 1 2 3 4)
+                                            , (Daycare 1 2 3 4)
+                                            , (Daycare 1 2 3 4)
+                                            , (Daycare 1 2 3 4)
+                                            , (Daycare 1 2 3 4)
+                                            , (Daycare 1 2 3 4)
+                                            ]
+                            
                Just _ -> return $ Daycares [ (Daycare 1 2 3 4) ]
          in daycares :<|> return (toSwagger (Proxy :: Proxy DayCareAPI))
 
