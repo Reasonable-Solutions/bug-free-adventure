@@ -45,20 +45,17 @@ type DayCareIdAPI = "id" :> Get '[JSON] Daycare
 
 type API = DayCareAPI :<|> DayCareIdAPI :<|> SwaggerAPI
 
-fakecare = Daycare 1 1 1 1 "id" "Oslo" "Fylke" "Sokkelbarnehagen"
+fakecare = Daycare 1 2 4 1 "id" "Oslo" "Fylke" "Sokkelbarnehagen"
 
 server :: Server API
 server = let
            daycares :: Maybe Text -> Handler Daycares
            daycares query = case query of
-               Nothing -> return $ Daycares [ fakecare
-                                            , fakecare
-                                            , fakecare
-                                            , fakecare
-                                            , fakecare
-                                            , fakecare
-                                            , fakecare
-                                            , fakecare
+               Nothing -> return $ Daycares [ Daycare 1 2 4 1 "id" "Oslo" "Oslo" "Oslobarnehagen"
+                                            ,Daycare 1 2 4 1 "id" "Bergen" "Bergen" "Bergenbarnehagen"
+                                            ,Daycare 1 2 4 1 "id" "Stavanger" "Stavanger" "Stavangarbarnehagen"
+                                            , Daycare 1 2 4 1 "id" "Stockholm" "Stockholm" "Stockholmbarnehagen"
+
                                             ]
                             
                Just _ -> return $ Daycares [ fakecare ]
