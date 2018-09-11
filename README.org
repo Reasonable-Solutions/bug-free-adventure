@@ -1,0 +1,8 @@
+* A tiny service to mock another service
+
+the other one aint very good either.
+
+** updating nix files
+
+just run ~~~cabal2nix . > default.nix~~~
+
