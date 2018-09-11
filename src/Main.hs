@@ -1,6 +1,6 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveAnyClass #-} 
-{-# LANGUAGE DeriveGeneric #-} 
+{-# LANGUAGE DeriveAnyClass #-}
+{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE TypeOperators #-}
 module Main where
@@ -10,6 +10,7 @@ import Data.Char as Char
 import Data.Swagger hiding (fieldLabelModifier)
 import Data.Text
 import GHC.Generics
+import Control.Exception (bracket)
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Middleware.Cors (simpleCors)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
@@ -25,9 +26,9 @@ data Daycare = Daycare { arsverkPedagogiskLeder :: Double
                        , antallBarnFraOgMed3Ar :: Double
                        , antallBarnUnder3Ar :: Double
                        , uniqueId :: Text
-                       , kommune :: Text 
-                       , fylke :: Text 
-                       , barnehagenavn :: Text 
+                       , kommune :: Text
+                       , fylke :: Text
+                       , barnehagenavn :: Text
                        } deriving (Generic, ToSchema, Show)
 
 instance ToJSON Daycare where
@@ -57,7 +58,7 @@ server = let
                                             , Daycare 1 2 4 1 "id" "Stockholm" "Stockholm" "Stockholmbarnehagen"
 
                                             ]
-                            
+
                Just _ -> return $ Daycares [ fakecare ]
          in daycares :<|> return fakecare :<|> return (toSwagger (Proxy :: Proxy DayCareAPI))
 
